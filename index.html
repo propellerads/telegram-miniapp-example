@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Play online slot machine and win cons!">
+  <title>Roll!</title>
+  <script src="//psaunsooksuthi.com/vignette.min.js" data-zone="8257405" data-sdk="show_8257405"></script>
+  <style>
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #eee;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+}
+
+@keyframes show {
+  from { margin-top: -64px; }
+  to { margin-top: 0; }
+}
+
+@keyframes tilt-shaking {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(3deg); }
+  50% { transform: rotate(0eg); }
+  75% { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.tada, .balance {
+  width: 192px;
+  height: 64px;
+  font: bold 24px/64px monospace;
+  text-align: center;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+}
+
+.balance {
+  background: #3b5dc9;
+  color: #fff;
+}
+
+.balance:before {
+  content: '🪙';
+  margin-right: 10px;
+}
+
+.rows {
+  width: 192px;
+  height: 192px;
+  display: flex;
+}
+
+.row {
+  width: 64px;
+  height: 192px;
+  overflow: hidden;
+}
+
+.item {
+  width: 64px;
+  height: 64px;
+  animation-duration: 0.7s;
+  animation-name: show;
+  text-align: center;
+  overflow: hidden;
+  font: 24px/64px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  background: #fff;
+  transition: all 0.2s ease 0s;
+}
+
+button {
+  margin: 0;
+  padding: 0;
+  width: 192px;
+  height: 64px;
+  display: block;
+  background: #38b764;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 5px;
+  transition: all 0.3s ease 0s;
+  border: 1px solid #fff;
+  box-sizing: border-box;
+  font: bold 24px/32px monospace;
+  opacity: 1;
+}
+
+.spin_button {
+  animation: tilt-shaking 0.2s infinite;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+button:disabled {
+  background: #b13e53;
+  color: rgba(255, 255, 255, 0.5);
+  animation: none;
+}
+
+
+.watch_ads {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="tada hidden">🎉 🎉 🎉</div>
+    <div class="balance">0</div>
+
+    <div class="rows">
+      <div class="row"></div>
+      <div class="row"></div>
+      <div class="row"></div>
+    </div>
+
+    <button class="spin_button">roll</button>
+    <button class="restart_button hidden">restart</button>
+  </div>
+
+  <script type="text/javascript">
+const sessionId = Math.random().toString(36).slice(2)
+const variations = ['🍒', '🍓', '🍋', '💲', '💎', '🏆', '🔔', '🍀', '🎁']
+const rows = [].slice.call(document.querySelectorAll('.row'));
+const timeout = (time) => new Promise((resolve) => setTimeout(resolve, time))
+
+const addItem = (row) => {
+  const variationId = Math.floor(Math.random() * variations.length)
+  const i = document.createElement('div')
+
+  i.classList.add('item')
+  i.innerText = variations[variationId]
+
+  row.insertBefore(i, row.firstChild)
+}
+
+const initRows = () => {
+  rows.forEach(row => {
+    Array.from({ length: 3 }).forEach(() => addItem(row))
+  })
+}
+
+const rollAndFill = async () => {
+	for (let i = 0; i < 30; i++) {
+    if (i < 10) {
+      addItem(rows[0])
+    }
+
+    if (i < 20) {
+      addItem(rows[1])
+    }
+
+    addItem(rows[2])
+
+    await timeout(80)
+  }
+}
+
+const removeOldItems = () => {
+  rows.forEach((row) => {
+    const items = row.querySelectorAll('.item')
+    const toRemove = [].slice.call(items, 3) // remove all except 3 first items
+
+    toRemove.forEach((item) => item.parentNode.removeChild(item))
+  })
+}
+
+const checkAndHighlight = (item1, item2, item3) => {
+  if (item1.innerText === item2.innerText && item1.innerText === item3.innerText) {
+    item1.style.background = '#38b764'
+    item2.style.background = '#38b764'
+    item3.style.background = '#38b764'
+
+    return true
+  }
+
+  return false
+}
+
+const getBalance = () => {
+  return parseInt(document.querySelector('.balance').innerText.trim(), 10)
+}
+
+const updateBalance = (diff) => {
+  document.querySelector('.balance').innerText = getBalance() + diff;
+}
+
+const updateBalanceByOne = async (diff) => {
+  if (diff < 1) {
+    return
+  }
+
+  await timeout(1000)
+
+  while (diff > 0) {
+    if (diff > 100) {
+      updateBalance(100)
+      diff -= 100
+    } else if (diff > 10) {
+      updateBalance(10)
+      diff -= 10
+    } else {
+      updateBalance(1)
+      diff -= 1
+    }
+
+    await timeout(100)
+  }
+
+  updateButtons()
+}
+
+const updateButtons = () => {
+  const spinButton = document.querySelector('.spin_button')
+  const restartButton = document.querySelector('.restart_button')
+
+  console.log('update buttons')
+
+  if (getBalance() > 0) {
+    spinButton.removeAttribute('disabled')
+    spinButton.innerText = 'roll'
+
+    if (!restartButton.classList.contains('hidden')) {
+      restartButton.classList.add('hidden')
+    }
+  } else {
+    spinButton.innerText = 'bankrupt'
+    restartButton.classList.remove('hidden')
+  }
+}
+
+const checkWinning = async () => {
+  const items = rows.map((row) => [].slice.call(row.querySelectorAll('.item')))
+
+  const checks = [
+    // horizontal
+    checkAndHighlight(items[0][0], items[0][1], items[0][2]),
+    checkAndHighlight(items[1][0], items[1][1], items[1][2]),
+    checkAndHighlight(items[2][0], items[2][1], items[2][2]),
+
+    // vertical
+    checkAndHighlight(items[0][0], items[1][0], items[2][0]),
+    checkAndHighlight(items[0][1], items[1][1], items[2][1]),
+    checkAndHighlight(items[0][2], items[1][2], items[2][2]),
+
+    // diagonal
+    checkAndHighlight(items[0][0], items[1][1], items[2][2]),
+    checkAndHighlight(items[2][0], items[1][1], items[0][2]),
+  ]
+
+  const wins = checks.filter((i) => i)
+
+  if (wins.length > 0) {
+    const amount = (6 + wins.length) * wins.length
+
+    document.querySelector('.tada').classList.remove('hidden')
+    await timeout(500)
+    await updateBalanceByOne(amount)
+    document.querySelector('.tada').classList.add('hidden')
+  }
+
+  updateButtons()
+}
+
+document.querySelector('.spin_button').addEventListener('click', async () => {
+	document.querySelector('.spin_button').setAttribute('disabled', 'disabled')
+
+  updateBalance(-1)
+  await rollAndFill()
+  await timeout(500)
+  removeOldItems()
+
+  await checkWinning()
+})
+
+document.querySelector('.restart_button').addEventListener('click', () => {
+  window.location.reload()
+})
+
+initRows()
+updateBalanceByOne(5)
+
+try {
+  const button = document.body.appendChild(document.createElement('button'))
+
+  button.classList.add('watch_ads')
+  button.innerText = 'Watch Ads (+15🪙)'
+
+  const refresh = () => {
+    // button is inactive until the ad is loaded
+    button.setAttribute('disabled', 'disabled')
+
+    show_8257405('preload').then(() => {
+      // the ad is ready, the button is active
+      button.removeAttribute('disabled')
+    }).catch(e => console.error(e))
+  }
+
+  // start ad preloading
+  refresh()
+
+  button.addEventListener('click', () => {
+    show_8257405().then(() => {
+      // add 15 coins after the user has watched an ad
+      updateBalanceByOne(15)
+
+      // preloading ad again
+      refresh()
+    }).catch(e => {
+      console.error(e)
+      alert('Sorry, no ads this time!')
+    })
+  })
+} catch (e) {}
+  </script>
+</body>
+</html>
